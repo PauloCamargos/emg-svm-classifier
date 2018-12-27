@@ -1,6 +1,7 @@
 TECHNIQUES.md
 cronograma.xlsx
 .vscode/
+data/
 *.zip
 *.rar
-*/data
+
