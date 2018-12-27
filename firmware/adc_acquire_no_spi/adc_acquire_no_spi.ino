@@ -1,9 +1,12 @@
 /***
- * Max SPI speed: 100kHz
- * MSB first
- * Borda de descida
- * CPOL: 0
- * SPI_MODE0
+  Author: Paulo Camargos
+  Description: Reads data from 2 ADS8344 channels and 
+  sends via serial. 
+  *THIS PROGRAM DOESN'T .USE THE SPI LIBRARY
+  AND HASN'T BEEN TESTED*
+  
+  Date: 18/12/2018
+
          ___ 
 CH0  1  | u |  20 +Vcc 
 CH1  2  |   |  19 DCLK
@@ -126,15 +129,6 @@ void show_data(){
 }
 
 void loop() {
-//  if (iniciar == 0) 
-//  {
-//      Timer3.attachInterrupt(handler);
-//      Timer3.start(2000); 
-//   }
+  // empty
 }
 
-
-void handler()
-{
- 
-}

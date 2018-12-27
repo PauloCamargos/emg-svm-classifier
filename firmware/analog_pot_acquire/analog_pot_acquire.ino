@@ -1,7 +1,9 @@
 /***
   Author: Paulo Camargos
-  Description: Program for sending data from analog pins
-  with specified frequency.
+  Description: Program for sending data from analog pins using 
+  a potentiometer with specified frequency. Also, if set
+  sends a sine and cossine wave.
+  
   Date: 18/12/2018
 
   Packet description

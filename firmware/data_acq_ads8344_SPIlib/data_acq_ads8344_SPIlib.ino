@@ -4,28 +4,23 @@
  * This program reads data from 2 channels and returns the 
  * read values inside a package.
  * 
- * Max SPI speed: 100kHz
- * MSB first
- * Borda de descida
- * CPOL: 0
- * SPI_MODE0
-
-ADS8344 PIN CONFIGURATION 
-         ___ 
-CH0  1  | u |  20 +Vcc 
-CH1  2  |   |  19 DCLK
-CH2  3  |   |  18 CS
-CH3  4  |   |  17 Din
-CH4  5  |   |  16 BUSY
-CH5  6  |   |  15 Dout
-CH6  7  |   |  14 GND
-CH7  8  |   |  13 GND
-COM  9  |   |  12 Vcc
-SHDN 10 |___|  11 Vref
-
+ * ----------------------------------
+ * ADS8344 PIN CONFIGURATION 
+ *          ___ 
+ * CH0  1  | u |  20 +Vcc 
+ * CH1  2  |   |  19 DCLK
+ * CH2  3  |   |  18 CS
+ * CH3  4  |   |  17 Din
+ * CH4  5  |   |  16 BUSY
+ * CH5  6  |   |  15 Dout
+ * CH6  7  |   |  14 GND
+ * CH7  8  |   |  13 GND
+ * COM  9  |   |  12 Vcc
+ * SHDN 10 |___|  11 Vref
+ *
  * DATASHEET: http://www.ti.com/lit/ds/symlink/ads8344.pdf
- * 
- * **********************
+ *
+ * ----------------------------------
  * SERIAL OUTPUT PACKET DESCRIPTION
  * Packet description
  * For 1 channels:
@@ -50,23 +45,19 @@ SHDN 10 |___|  11 Vref
 #define N_CH 2// Number of channels
 
 #define CS_pin 10
-#define AD_BUSY 9
 #define NULL_SPI 0x00
 
 // Order of the Control Bits 
 // (MSB)          (LSB)
 // | 15 | 14 | ... | 0 |
-#define AD_CONFIG 0x86  //0b1000 0110 //CH1
-#define AD_CONVERT 0x84 //0b1000 0100
+#define CH1_CONFIG 0x86  //0b1000 0110 //CH1
+#define CH1_CONVERTER 0x84 //0b1000 0100
 
-#define AD_CONFIG0 0xc6  //0b1100 0110 // CH2
-#define AD_CONVERT0 0xc4 //0b1100 0100
+#define CH2_CONFIG 0xc6  //0b1100 0110 // CH2
+#define CH2_CONVERTER 0xc4 //0b1100 0100
 
 uint16_t read_adc_values[N_CH]; // holds the adcvalue for each channel
-//#define AD_CONVERT 0x84 //0b1000 0100
 
-// byte commandbits = B10000111; // command ch0
-// byte commandbits = B11000111; // command ch1
 
 void setup() {
   // pinmode configuration
@@ -79,24 +70,19 @@ void setup() {
 
   setup_conversor();
   
-  //T.every(ts, Aquis); //ativa o timer
   Timer1.initialize(1.0/FREQ_ACQ * pow(10,6));
   // setting the timer to work with the specified function
   Timer1.attachInterrupt(read_adc);
 }
 
-/**
-   Send a packet to request a reading, waits the busy signal to become low, and send 2 null values to read the msb and lsb.
-*/
 void setup_conversor() {
   SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
 
-  SPI.transfer(AD_CONFIG);//0 | (channel << 4));//Enviando comando para configurar
+  SPI.transfer(CH1_CONFIG);//0 | (channel << 4));//Enviando comando para configurar
   //esperar 100ns, que nesse caso seria o tempo de instrução(?)
   digitalWrite(CS_pin, HIGH);
   delayMicroseconds(2); //espera 2us tempo de converter
   digitalWrite(CS_pin, LOW);
-  //while(digitalRead(AD_BUSY)); //tira esse e esperar 200ns, que é o tempo de instrução(?)
   SPI.transfer(NULL_SPI);
   SPI.transfer(NULL_SPI);
   SPI.transfer(NULL_SPI); //IDLE
@@ -113,14 +99,13 @@ void read_adc(){
   digitalWrite(CS_pin, LOW);
   SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
 
-  SPI.transfer(AD_CONVERT);//0 | (channel << 4));//Enviando comando para aquisição de dados
+  SPI.transfer(CH1_CONVERTER);//0 | (channel << 4));//Enviando comando para aquisição de dados
   //esperar 100ns, que nesse caso seria o tempo de instrução(?)
 
   digitalWrite(CS_pin, HIGH);
   delayMicroseconds(2); //espera 2us tempo de converter
 
   digitalWrite(CS_pin, LOW);
-  //while(digitalRead(AD_BUSY)); //tira esse e esperar 200ns, que é o tempo de instrução(?)
   conv_msb = SPI.transfer(NULL_SPI);
   conv_lsb = SPI.transfer(NULL_SPI);
   SPI.transfer(NULL_SPI); //IDLE
@@ -135,14 +120,13 @@ void read_adc(){
   digitalWrite(CS_pin, LOW);
   SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
 
-  SPI.transfer(AD_CONVERT0);//0 | (channel << 4));//Enviando comando para aquisição de dados
+  SPI.transfer(CH2_CONVERTER);//0 | (channel << 4));//Enviando comando para aquisição de dados
   //esperar 100ns, que nesse caso seria o tempo de instrução(?)
 
   digitalWrite(CS_pin, HIGH);
   delayMicroseconds(2); //espera 2us tempo de converter
 
   digitalWrite(CS_pin, LOW);
-  //while(digitalRead(AD_BUSY)); //tira esse e esperar 200ns, que é o tempo de instrução(?)
   conv_msb = SPI.transfer(NULL_SPI);
   conv_lsb = SPI.transfer(NULL_SPI);
   SPI.transfer(NULL_SPI); //IDLE
