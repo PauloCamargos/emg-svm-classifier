@@ -10,7 +10,6 @@ from numpy import clip
 import time as py_time
 import serial
 from collections import deque
-from controller import ArduinoHandler
 import logging
 
 class CustomPlotEMG(pg.GraphicsWindow):
@@ -43,9 +42,9 @@ class CustomPlotEMG(pg.GraphicsWindow):
         #pg.setConfigOption('foreground', 'k')
         pg.GraphicsWindow.__init__(self, parent=None)
         
-        pg.setConfigOptions(antialias=True)          
-        self.useOpenGL
-        pg.setConfigOptions(useOpenGL=True)
+        # pg.setConfigOptions(antialias=True)          
+        # self.useOpenGL
+        # pg.setConfigOptions(useOpenGL=True)
 
         self.arduino_handler = arduino_handler
         self.arduino_handler.start_acquisition()
@@ -55,7 +54,7 @@ class CustomPlotEMG(pg.GraphicsWindow):
         # signal sample period [s] 
         self.sample_period = 1 / self.sample_frequecy 
          # window time [s] to show the signal
-        self.show_time_window = 3 
+        self.show_time_window = 15 
         # obs.: Window time depends on FPS rate and other factors. 
         # It's a mere aproximation.
 
@@ -100,8 +99,8 @@ class CustomPlotEMG(pg.GraphicsWindow):
 
 
         # channels curves
-        self.curva_ch1 = self.plot_ch1.plot(pen=pg.mkPen(color='g',width=0.9),name='CH1',)
-        self.curva_ch2 = self.plot_ch2.plot(pen=pg.mkPen(color='r',width=0.9),name='CH2')
+        self.curva_ch1 = self.plot_ch1.plot(pen=pg.mkPen(color='g',width=0.5),name='CH1',)
+        self.curva_ch2 = self.plot_ch2.plot(pen=pg.mkPen(color='r',width=0.5),name='CH2')
         
          # hiding x axis from ch1
         self.plot_ch1.hideAxis('bottom')
@@ -111,7 +110,7 @@ class CustomPlotEMG(pg.GraphicsWindow):
         # Graph updater and arduino handler consumer
         timer.timeout.connect(self.update)  
         # interval between graph updates
-        timer.start(0)
+        timer.start(100)
 
         # setting up a logger
         self.logger = logging.getLogger(__name__)
@@ -120,29 +119,6 @@ class CustomPlotEMG(pg.GraphicsWindow):
         st.setLevel(logging.DEBUG)
         st.setFormatter(logging.Formatter('[%(levelname)s] in %(name)s(%(lineno)d): %(message)s'))
         self.logger.addHandler(st)
-        
-    def consume_data(self):
-        # num = queue.get(timeout=0.1)
-        # # obtains the new value
-        # num =  queue.popleft()
-        # self.logger.info('Consumed')
-        # queue.task_
-        # self.values_ch1.append(num[0] - 500)
-        # self.values_ch2.append(num[1] - 500)
-        # # updating time axis tick 
-        # self.x_tick.append(self.sample_index* self.sample_period)
-
-        # # remove the oldest values                                
-        # if len(self.values_ch1) > self.amount_of_points: 
-        #     self.values_ch1.popleft()
-        # if len(self.values_ch2) > self.amount_of_points:
-        #     self.values_ch2.popleft()
-        # if len(self.x_tick) > self.amount_of_points:
-        #     self.x_tick.popleft()
-
-        # # incresing the sample index
-        # self.sample_index+= 1
-        print('shittt')
 
 
     def update(self):
@@ -213,7 +189,13 @@ class CustomPlotEMG(pg.GraphicsWindow):
 
 
 if __name__ == '__main__':
-    arduino_handler = ArduinoHandler.ArduinoHandler.instance(port_name='COM3', baudrate=115200, qnt_ch=2)
+    # Path hack.
+    import sys, os
+    sys.path.insert(0, os.path.abspath('..'))
+
+    from controller.ArduinoHandler import ArduinoHandler 
+
+    arduino_handler = ArduinoHandler.instance(port_name='/dev/ttyACM0', baudrate=115200, qnt_ch=2)
 
     w = CustomPlotEMG(arduino_handler=arduino_handler)
     w.show()

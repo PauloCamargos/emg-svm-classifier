@@ -12,7 +12,7 @@ After processing and classification, commands are sent to a serious game
 to control a virtual prosthetic hand.
 
 ## How to use
-TODO
+To **install the tools** used in this project, go to the `docs/installs.md` file and follow its instructions.
 
 ## Main tools 
 
